@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		40C6D4B52D7F8619006D8BEC /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 40C6D4B42D7F860B006D8BEC /* .gitignore */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		40C6D4972D7F839E006D8BEC /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -27,6 +31,7 @@
 		40C6D4852D7F839D006D8BEC /* tracker-etf.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "tracker-etf.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		40C6D4962D7F839E006D8BEC /* tracker-etfTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "tracker-etfTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		40C6D4A02D7F839E006D8BEC /* tracker-etfUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "tracker-etfUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		40C6D4B42D7F860B006D8BEC /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -75,6 +80,7 @@
 		40C6D47C2D7F839D006D8BEC = {
 			isa = PBXGroup;
 			children = (
+				40C6D4B42D7F860B006D8BEC /* .gitignore */,
 				40C6D4872D7F839D006D8BEC /* tracker-etf */,
 				40C6D4992D7F839E006D8BEC /* tracker-etfTests */,
 				40C6D4A32D7F839E006D8BEC /* tracker-etfUITests */,
@@ -101,6 +107,7 @@
 			buildPhases = (
 				40C6D4812D7F839D006D8BEC /* Sources */,
 				40C6D4822D7F839D006D8BEC /* Frameworks */,
+				40C6D4B32D7F841C006D8BEC /* ShellScript */,
 				40C6D4832D7F839D006D8BEC /* Resources */,
 			);
 			buildRules = (
@@ -212,6 +219,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				40C6D4B52D7F8619006D8BEC /* .gitignore in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -230,6 +238,26 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		40C6D4B32D7F841C006D8BEC /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if which swiftlint >/dev/null; then\n  swiftlint\nelse\n  echo \"warning: SwiftLint non è installato! Scaricalo da https://github.com/realm/SwiftLint\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		40C6D4812D7F839D006D8BEC /* Sources */ = {
