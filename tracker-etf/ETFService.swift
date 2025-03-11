@@ -16,8 +16,13 @@ struct ETFData: Codable {
 // Classe che gestisce il recupero dei dati degli ETF da Yahoo Finance
 class ETFService: ObservableObject {
     @Published var etfs: [ETFData] = []  // Lista degli ETF da mostrare nell'app
+    private let historicalMaxKey = "historicalMax"  // Chiave per salvare il dizionario anche dopo il riavvio dell'app
     private var historicalMax: [String: Double] = [:] // Storico dei massimi per ogni ETF
-
+    
+    init () {
+        loadHistoricalMax()
+    }
+    
     // Funzione per recuperare il prezzo attuale di un ETF dato il simbolo (es. "VOO" per Vanguard S&P 500)
     func fetchETFPrice(for symbol: String) {
         let apiKey = "3WE78DP63WTC14AE"
@@ -60,12 +65,28 @@ class ETFService: ObservableObject {
         }.resume()  // Avvio della richiesta HTTP
     }
     
+    // Salva gli etf e i prossimi massimi in UserDafaults per averli anche dopo il riavvio dell'app
+    private func saveHistoricalMax() {
+        if let data = try? JSONEncoder().encode(historicalMax) {
+            UserDefaults.standard.set(data, forKey: historicalMaxKey)
+        }
+    }
+    
+    private func loadHistoricalMax() {
+            if let data = UserDefaults.standard.data(forKey: historicalMaxKey),
+               let savedDict = try? JSONDecoder().decode([String: Double].self, from: data) {
+                historicalMax = savedDict
+                print("📂 Massimi storici caricati: \(historicalMax)")
+            }
+        }
+    
     // Aggiorna il massimo degli ultimi 30 giorni
     private func updateMaxPrice(for symbol: String, price: Double) {
         if let currentMax = historicalMax[symbol] {
             historicalMax[symbol] = max(currentMax, price)
         } else {
             historicalMax[symbol] = price
+            saveHistoricalMax()
         }
     }
     
