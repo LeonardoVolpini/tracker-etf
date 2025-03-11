@@ -16,6 +16,7 @@ struct ETFData: Codable {
 // Classe che gestisce il recupero dei dati degli ETF da Yahoo Finance
 class ETFService: ObservableObject {
     @Published var etfs: [ETFData] = []  // Lista degli ETF da mostrare nell'app
+    private var historicalMax: [String: Double] = [:] // Storico dei massimi per ogni ETF
 
     // Funzione per recuperare il prezzo attuale di un ETF dato il simbolo (es. "VOO" per Vanguard S&P 500)
     func fetchETFPrice(for symbol: String) {
@@ -40,6 +41,10 @@ class ETFService: ObservableObject {
                         DispatchQueue.main.async {
                             let etf = ETFData(symbol: quote.symbol, price: quote.regularMarketPrice)
                             self.etfs.append(etf)
+                            
+                            self.updateMaxPrice(for: quote.symbol, price: quote.regularMarketPrice)
+                            
+                            self.checkETFDrop(for: quote.symbol, price: quote.regularMarketPrice)
                         }
                     }
                 } catch {
@@ -49,16 +54,22 @@ class ETFService: ObservableObject {
         }.resume()  // Avvio della richiesta HTTP
     }
     
-    func checkETFDrop(for symbol: String) {
-        let max30Days: Double = 500.0  // Supponiamo di ottenere questo valore dall'API
+    // Aggiorna il massimo degli ultimi 30 giorni
+    private func updateMaxPrice(for symbol: String, price: Double) {
+        if let currentMax = historicalMax[symbol] {
+            historicalMax[symbol] = max(currentMax, price)
+        } else {
+            historicalMax[symbol] = price
+        }
+    }
+    
+    private func checkETFDrop(for symbol: String, price: Double) {
+        guard let max30Days = historicalMax[symbol] else { return }
         let threshold = max30Days * 0.9 // Calcoliamo il -10% dal massimo
-        
-        fetchETFPrice(for: symbol)  // Prezzo attuale
 
-        if let etf = etfs.first(where: { $0.symbol == symbol }) {
-            if etf.price < threshold {
-                print("⚠️ ALERT: \(symbol) è sceso sotto il 10% dal massimo!")
-            }
+        if price < threshold {
+            let message = "⚠️ ALERT: \(symbol) ha perso più del 10% dal massimo degli ultimi 30 giorni! Prezzo attuale: \(price) USD."
+            TelegramService.shared.sendTelegramMessage(message)
         }
     }
 
