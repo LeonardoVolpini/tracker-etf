@@ -20,8 +20,9 @@ class ETFService: ObservableObject {
 
     // Funzione per recuperare il prezzo attuale di un ETF dato il simbolo (es. "VOO" per Vanguard S&P 500)
     func fetchETFPrice(for symbol: String) {
-        // URL dell'API di Yahoo Finance per ottenere il prezzo di un simbolo specifico
-        let urlString = "https://query1.finance.yahoo.com/v7/finance/quote?symbols=\(symbol)"
+        let apiKey = "3WE78DP63WTC14AE"
+        // URL dell'API di Alpha Vintage per ottenere il prezzo di un simbolo specifico
+        let urlString = "https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=\(symbol)&apikey=\(apiKey)"
         
         // Controllo che l'URL sia valido
         guard let url = URL(string: urlString) else {
@@ -33,18 +34,23 @@ class ETFService: ObservableObject {
         URLSession.shared.dataTask(with: url) { data, _, error in
             if let data = data {
                 do {
+                    // Stampiamo il JSON in formato leggibile
+                    if let jsonString = String(data: data, encoding: .utf8) {
+                        print("📜 JSON ricevuto: \(jsonString)")
+                    }
                     // Decodifica JSON ottenuto in oggetti Swift
-                    let decodedData = try JSONDecoder().decode(QuoteResponse.self, from: data)
+                    let decodedData = try JSONDecoder().decode(AlphaVantageResponse.self, from: data)
                     
                     // Se risultato valido, aggiorno la lista di ETF
-                    if let quote = decodedData.quoteResponse.result.first {
+                    if let priceString = decodedData.globalQuote.price,
+                        let price = Double(priceString){
                         DispatchQueue.main.async {
-                            let etf = ETFData(symbol: quote.symbol, price: quote.regularMarketPrice)
+                            let etf = ETFData(symbol: symbol, price: price)
                             self.etfs.append(etf)
                             
-                            self.updateMaxPrice(for: quote.symbol, price: quote.regularMarketPrice)
+                            self.updateMaxPrice(for: symbol, price: price)
                             
-                            self.checkETFDrop(for: quote.symbol, price: quote.regularMarketPrice)
+                            self.checkETFDrop(for: symbol, price: price)
                         }
                     }
                 } catch {
@@ -75,16 +81,21 @@ class ETFService: ObservableObject {
 
 }
 
-// Strutture per decodificare la risposta JSON di Yahoo Finance
-struct QuoteResponse: Codable {
-    let quoteResponse: QuoteResult
+// Mappo la risposta nel JSON "Global Quote" dentro globalQuote
+struct AlphaVantageResponse: Codable {
+    enum CodingKeys: String, CodingKey {
+        case globalQuote = "Global Quote"
+    }
+    
+    let globalQuote: GlobalQuote
 }
 
-struct QuoteResult: Codable {
-    let result: [Quote]
+// Estrapola il prezzo dalla "Global Quote"
+struct GlobalQuote: Codable {
+    enum CodingKeys: String, CodingKey {
+        case price = "05. price"
+    }
+    
+    let price: String?
 }
 
-struct Quote: Codable {
-    let symbol: String
-    let regularMarketPrice: Double  // Prezzo di mercato corrente
-}
